@@ -19,10 +19,16 @@ def tutorial():
 
 @app.route('/api/v1/getTree', methods=['GET'])
 def api_get_tree():
-    arity = int(request.args['arity'])
-    depth = int(request.args['depth'])
-    qty = int(request.args['qty'])
+    try:
+        arity = int(request.args['arity'])
+        depth = int(request.args['depth'])
+        qty = int(request.args['qty'])
+    except ValueError:
+        abort(400)
     print(arity,depth,qty)
+    if arity > 10 or depth > 20 or qty > 300:
+        abort(413)
+
     if  not paramsAreNotValid(arity,depth,qty):
 
         val = getTree(arity,depth,qty) 
@@ -89,12 +95,16 @@ def api_get_tree_image():
 def getTree(arity,depth,qty):
     nodesLeft = [qty-i for i in range(qty)]
     maxNodes = getMaxNodes(arity,depth)
+    if len(nodesLeft) == 0 or len(nodesLeft) == 1:
+        return []
+    
     root = nodesLeft.pop()
     treeStruct = [None for i in range(maxNodes)]
     treeStruct[0] = root
     for i in getChildren(0,arity):
         treeStruct[i] = 0
     adjList = []
+
     while len(nodesLeft) > 0:
         node = nodesLeft.pop()
         index = random.choice(getZeroIndices(treeStruct))
@@ -102,7 +112,6 @@ def getTree(arity,depth,qty):
         for i in getChildren(index,arity):
             if i < maxNodes:
                 treeStruct[i] = 0
-
 
     for i in range(len(treeStruct)):
         if treeStruct[i] is not None:
@@ -135,7 +144,10 @@ def isANode(value):
     return value is not None and value != 0
 
 def getMaxNodes(arity,depth):
-    return int((1 - arity**(depth+1))/(1-arity))
+    if arity > 1:
+        return int((1 - arity**(depth+1))/(1-arity))
+    else:
+        return arity*depth
 
 def paramsAreNotValid(arity,depth,qty):
     maxNodes = getMaxNodes(arity,depth)
