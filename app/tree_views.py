@@ -26,7 +26,7 @@ def api_get_tree():
     except ValueError:
         abort(400)
     print(arity,depth,qty)
-    if arity > 8 or depth > 16 or qty > 256:
+    if arity > 5 or depth > 10 or qty > 100:
         abort(413)
 
     if  not paramsAreNotValid(arity,depth,qty):
