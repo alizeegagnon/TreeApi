@@ -17,8 +17,25 @@ app.config["CLIENT_IMAGES"] = "/home/alizee/Work/code/treeApi/flaskApp/app/stati
 def tutorial():
     return "Hello world!"
 
-@app.route('/api/v1/getTree', methods=['PUT'])
+@app.route('/api/v1/getTree', methods=['GET'])
 def api_get_tree():
+    arity = int(request.args['arity'])
+    depth = int(request.args['depth'])
+    qty = int(request.args['qty'])
+    print(arity,depth,qty)
+    if  not paramsAreNotValid(arity,depth,qty):
+
+        val = getTree(arity,depth,qty) 
+    else:
+        val = "La quantité de sommets soumise est trop grosse pour l'arité et la profondeur. Il faudrait une quantité qui n'est pas plus grande que " + str(getMaxNodes(arity,depth))+"."
+    response = jsonify({"val": str(val)})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    print(val)
+    return response
+
+
+@app.route('/api/v1/putTree', methods=['PUT'])
+def api_put_tree():
     data = getList(request.data.decode("utf-8"))
     arity = int(data[0])
     depth = int(data[1])
