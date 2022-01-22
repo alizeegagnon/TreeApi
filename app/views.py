@@ -1,8 +1,11 @@
 from app import app 
+import os
+
 
 @app.route("/")
 def index():
-    return "Hello World"
+    name = os.environ.get("NAME", "World")
+    return "Hello {}!".format(name)
 
 @app.route("/about")
 def about():
