@@ -7,23 +7,28 @@ import networkx as nx
 import random
 import time
 
-#cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+maxArity = 5
+maxDepth = 10
+maxQty = 150
 
-
-#app.config["DEBUG"] = True
-#app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["CLIENT_IMAGES"] = "/home/alizee/Work/code/treeApi/flaskApp/app/static"
 
 @app.route("/learn/flask")
 def tutorial():
     return "Hello world!"
 
+
+@app.route('/api/v1/getMaxParams', methods=['GET'])
+def api_get_max_params():
+    params = [maxArity, maxDepth, maxQty]
+    print(params)
+    message = jsonify({"params": params})
+    message.headers.add("Access-Control-Allow-Origin", "*")
+    return message
+
+
 @app.route('/api/v1/getTree', methods=['GET'])
 def api_get_tree():
-
-    maxArity = 5
-    maxDepth = 10
-    maxQty = 100
 
     try:
         arity = int(request.args['arity'])
@@ -52,59 +57,6 @@ def api_get_tree():
     response.headers.add("Access-Control-Allow-Origin", "*")
     print(val)
     return response
-
-
-@app.route('/api/v1/putTree', methods=['PUT'])
-def api_put_tree():
-    data = getList(request.data.decode("utf-8"))
-    arity = int(data[0])
-    depth = int(data[1])
-    qty = int(data[2])
-    if  not paramsAreNotValid(arity,depth,qty):
-
-        val = getTree(arity,depth,qty) 
-    else:
-        val = "La quantité de sommets donnée est trop grosse pour l'arité et la profondeur. Il faudrait une quantité qui n'est pas plus grande que " + str(getMaxNodes(arity,depth))
-    response = jsonify({"val": str(val)})
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    print(val)
-    return response
-
-
-@app.route('/api/v1/getTreeImage', methods=['PUT'])
-def api_get_tree_image():
-    #arity = request.args.get('arity')
-    #depth = request.args.get('depth')
-    #qty  = request.args.get('qty')
-
-    #val = arity + depth + qty
-    data = getList(request.data.decode("utf-8"))
-    arity = int(data[0])
-    depth = int(data[1])
-    qty = int(data[2])
-    if  not paramsAreNotValid(arity,depth,qty):
-
-        val = getTree(arity,depth,qty) 
-    
-        H = nx.Graph(val)
-        nx.draw(H, with_labels=True, font_weight='bold')
-        timestamp = time.time()
-        path = "/home/alizee/Work/code/treeApi/treegenerator/src/graph"+str(timestamp)+".png"
-        plt.savefig(path)
-        plt.savefig("./app/static/graph.png")
-        plt.clf() 
-    else:
-        val = "La quantité de sommets donnée est trop grosse pour l'arité et la profondeur. Il faudrait une quantité qui n'est pas plus grande que " + str(getMaxNodes(arity,depth))
-        path = "/home/alizee/Work/code/treeApi/blank.png"
-
-    response = jsonify({"val": str(val), "url": path})
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    try:
-        return send_from_directory("/home/alizee/Work/code/treeApi/flaskApp/app/static", path="graph.png",as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
-
-
 
 def getTree(arity,depth,qty):
     nodesLeft = [qty-i for i in range(qty)]
