@@ -2,6 +2,7 @@ from app import app
 from flask import request, jsonify
 from flask_cors import CORS
 from flask import send_file, send_from_directory, safe_join, abort
+#from flask_restx import abort
 import networkx as nx
 import random
 import time
@@ -19,15 +20,28 @@ def tutorial():
 
 @app.route('/api/v1/getTree', methods=['GET'])
 def api_get_tree():
+
+    maxArity = 5
+    maxDepth = 10
+    maxQty = 100
+
     try:
         arity = int(request.args['arity'])
         depth = int(request.args['depth'])
         qty = int(request.args['qty'])
     except ValueError:
-        abort(400)
+        abort(400, "Les valeurs doivent être des entiers !")
     print(arity,depth,qty)
-    if arity > 5 or depth > 10 or qty > 100:
-        abort(413)
+    if arity > maxArity or depth > maxDepth or qty > maxQty:
+        err = 0
+        if arity > maxArity:
+            err+=1
+        if depth > maxDepth:
+            err+=10
+        if qty > maxQty:
+            err+=100
+        message = "Les valeurs sont trop grandes: "+str(err)
+        abort(413,message)
 
     if  not paramsAreNotValid(arity,depth,qty):
 
